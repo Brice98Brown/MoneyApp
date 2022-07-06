@@ -1,6 +1,7 @@
 ﻿using System;
 using TenmoClient.Data;
 using TenmoClient.APIClients;
+using System.Collections.Generic;
 
 namespace TenmoClient
 {
@@ -9,6 +10,7 @@ namespace TenmoClient
         private readonly ConsoleService consoleService = new ConsoleService();
         private readonly AuthService authService = new AuthService();
         private readonly AccountRestClient accountClient = new AccountRestClient();
+        private readonly UserRestClient userClient = new UserRestClient();
 
         private bool quitRequested = false;
 
@@ -74,11 +76,11 @@ namespace TenmoClient
                 }
                 else
                 {
+                    AccountsModel accounts = accountClient.GetAccounts();
                     switch (menuSelection)
                     {
                         case 1: // View Balance
-                            AccountsModel accounts = accountClient.GetAccounts();
-                            Console.WriteLine($"Your Current Account Balance is : ${accounts.Balance}"); 
+                            Console.WriteLine($"Your Current Account Balance is : ${accounts.Balance}");
                             break;
 
                         case 2: // View Past Transfers
@@ -90,7 +92,8 @@ namespace TenmoClient
                             break;
 
                         case 4: // Send TE Bucks
-                            Console.WriteLine("NOT IMPLEMENTED!"); // TODO: Implement me
+                            DisplayAllUsers(accounts); //passing in the account of the person logged in so that it doesn't display
+                            Console.WriteLine("TRANSFERRING NOT IMPLEMENTED!"); // TODO: Implement me
                             break;
 
                         case 5: // Request TE Bucks
@@ -103,7 +106,7 @@ namespace TenmoClient
                             Logout();
                             ShowLogInMenu();
                             // NOTE: You will need to clear any stored JWTs in other API Clients
-                            
+
 
                             return; // Leaves the menu and should return as someone else
 
@@ -118,6 +121,20 @@ namespace TenmoClient
                     }
                 }
             } while (menuSelection != 0);
+        }
+
+        private void DisplayAllUsers(AccountsModel account)
+        {
+            List<UserModel> users = userClient.GetAllUsers();
+            Console.WriteLine("-----------------------------------------------");
+            Console.WriteLine("User Id".PadRight(20) + "Username");
+            Console.WriteLine("-----------------------------------------------");
+            foreach (UserModel user in users)
+            {
+                if(user.UserId!= account.UserId)
+                Console.WriteLine(user.UserId.ToString().PadRight(20) + user.Username);
+            }
+            Console.WriteLine("-----------------------------------------------");
         }
 
         private void HandleUserRegister()
@@ -149,13 +166,15 @@ namespace TenmoClient
 
                     // TODO: Do something with this JWT.
                     accountClient.UpdateToken(jwt);
-                    
+                    userClient.GetToken(jwt);
+
                 }
             }
         }
         private void Logout()
         {
             accountClient.UpdateToken(null);
+            userClient.GetToken(null);
         }
     }
 }
