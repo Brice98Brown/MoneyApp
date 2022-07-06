@@ -1,5 +1,6 @@
 ﻿using System;
 using TenmoClient.Data;
+using TenmoClient.APIClients;
 
 namespace TenmoClient
 {
@@ -7,6 +8,7 @@ namespace TenmoClient
     {
         private readonly ConsoleService consoleService = new ConsoleService();
         private readonly AuthService authService = new AuthService();
+        private readonly AccountRestClient accountClient = new AccountRestClient();
 
         private bool quitRequested = false;
 
@@ -75,7 +77,8 @@ namespace TenmoClient
                     switch (menuSelection)
                     {
                         case 1: // View Balance
-                            Console.WriteLine("NOT IMPLEMENTED!"); // TODO: Implement me
+                            AccountsModel accounts = accountClient.GetAccounts();
+                            Console.WriteLine($"Your Current Account Balance is : ${accounts.Balance}"); 
                             break;
 
                         case 2: // View Past Transfers
@@ -97,9 +100,10 @@ namespace TenmoClient
                         case 6: // Log in as someone else
 
                             authService.ClearAuthenticator();
-
+                            Logout();
+                            ShowLogInMenu();
                             // NOTE: You will need to clear any stored JWTs in other API Clients
-                            Console.WriteLine("NOT IMPLEMENTED!");
+                            
 
                             return; // Leaves the menu and should return as someone else
 
@@ -144,9 +148,14 @@ namespace TenmoClient
                     string jwt = authenticatedUser.Token;
 
                     // TODO: Do something with this JWT.
-                    Console.WriteLine("DOING NOTHING WITH JWT");
+                    accountClient.UpdateToken(jwt);
+                    
                 }
             }
+        }
+        private void Logout()
+        {
+            accountClient.UpdateToken(null);
         }
     }
 }

@@ -43,20 +43,21 @@ namespace TenmoServer.Controllers
                 }
             }
         }
-        [HttpGet("{id}")]
+        [HttpGet()]
         [Authorize]
-        public ActionResult GetAccount(int id)
+        public ActionResult GetAccount()
         {
-            if (id <= 0)
+            int userId = LoggedInUserId;
+            if (userId <= 0)
             {
-                return BadRequest("Account id must be positive homes");
+                return Unauthorized("Please use valid Login Credientals homeslice");
             }
-            Account account = accountDAO.GetAccountByAccountId(id);
+            Account account = accountDAO.GetAccountByUserId(userId);
             if (account == null)
             {
                 return NotFound("could not find account number broseph");
             }
-            int userId = LoggedInUserId;
+            
             if (userId != account.UserId)
             {
                 return Forbid("This aint your account homie-g");

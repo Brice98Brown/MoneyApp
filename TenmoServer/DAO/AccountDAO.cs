@@ -14,15 +14,15 @@ namespace TenmoServer.DAO
         {
             this.connectionString = connstr;
         }
-        public Account GetAccountByAccountId(int accountId)
+        public Account GetAccountByUserId(int userId)
         {
-            string query = "SELECT account_id,user_id,balance FROM accounts WHERE account_id = @id";
+            string query = "SELECT account_id,user_id,balance FROM accounts WHERE user_id = @id";
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
 
                 SqlCommand command = new SqlCommand(query, conn);
-                command.Parameters.AddWithValue("@id", accountId);
+                command.Parameters.AddWithValue("@id", userId);
 
                 SqlDataReader reader = command.ExecuteReader();
                 if (reader.Read())
