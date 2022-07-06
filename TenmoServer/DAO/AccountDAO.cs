@@ -16,7 +16,7 @@ namespace TenmoServer.DAO
         }
         public Account GetAccountByAccountId(int accountId)
         {
-            string query = "SELECT account_id,user_id,balance FROM accounts WHERE user_id = @id";
+            string query = "SELECT account_id,user_id,balance FROM accounts WHERE account_id = @id";
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
