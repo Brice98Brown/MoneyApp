@@ -17,7 +17,7 @@ namespace TenmoClient.APIClients
         }
         public TransferModel NewTransfer(TransferModel transfer)
         {
-            RestRequest request = new RestRequest("api/accounts");
+            RestRequest request = new RestRequest("api/transfer");
             request.AddHeader("Authorization", "Bearer " + token);
             request.AddJsonBody(transfer);
             IRestResponse<TransferModel> response = client.Post<TransferModel>(request);

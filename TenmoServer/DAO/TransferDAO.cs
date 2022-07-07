@@ -46,5 +46,59 @@ namespace TenmoServer.DAO
             return transfers;
 
         }
+
+        public List<Transfers> GetAllTransfersForOneUser(int userId)
+        {
+
+            List<Transfers> transfers = new List<Transfers>();
+
+            const string sql = "SELECT account_from, account_to, transfer_id, amount FROM transfers INNER JOIN accounts a on a.account_id = account_from OR account_id = account_to INNER JOIN users u on u.user_id = a.user_id WHERE u.user_id = @userId";
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                SqlCommand command = new SqlCommand(sql, conn);
+                command.Parameters.AddWithValue("@userId", userId);
+
+                SqlDataReader reader = command.ExecuteReader();
+
+                while (reader.Read())
+                {
+                    Transfers transfer = GetTransfersFromDataReader(reader);
+
+                    transfers.Add(transfer);
+                }
+            }
+
+            return transfers;
+
+        }
+
+        private Transfers GetTransfersFromDataReader(SqlDataReader reader)
+        {
+           int transferId = Convert.ToInt32(reader["transfer_id"]);
+            int accountIdTo = Convert.ToInt32(reader["account_to"]);
+            int accountIdFrom = Convert.ToInt32(reader["account_from"]);
+            decimal amountToTransfer = Convert.ToDecimal(reader["amount"]);
+
+            //// Get the user ID which may be null
+            //object userIdRaw = reader["user_id"];
+            //int? userId = null;
+            //if (userIdRaw != DBNull.Value)
+            //{
+            //    userId = Convert.ToInt32(userIdRaw);
+            //}
+
+            Transfers transfers = new Transfers();
+            transfers.TransferId = transferId;
+            transfers.TransferType = "Send";
+            transfers.TransferStatus = "Approved";
+            transfers.AccountTo = accountIdTo;
+            transfers.AccountFrom = accountIdFrom;
+            transfers.TransferAmount = amountToTransfer;
+
+            return transfers;
+        }
     }
 }

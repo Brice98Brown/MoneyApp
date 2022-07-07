@@ -13,6 +13,11 @@ namespace TenmoServer.Models
         public string TransferStatus { get; set; }
         public string TransferType { get; set; }
         public decimal TransferAmount { get; set; }
+        public int SenderUserId { get; set; }
+        public int RecipientUserId { get; set; }
+        public string SenderUsername { get; set; } = "";
+        public string RecipientUsername { get; set; } = "";
+
 
     }
 }

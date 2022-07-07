@@ -95,20 +95,31 @@ namespace TenmoClient
                         case 4: // Send TE Bucks
                             DisplayAllUsers(accounts);//passing in the account of the person logged in so that it doesn't display
                             Console.WriteLine("Enter ID of user you are sending to (0 to cancel):");
-                            string moneyRecipient = Console.ReadLine();  
-                            if (int.Parse(moneyRecipient) == 0)
+                            int moneyRecipient; //= Console.ReadLine();
+                            if (!int.TryParse(Console.ReadLine(), out moneyRecipient))
+                            {
+                                Console.WriteLine("Invalid input. Please enter only a number.");
+                            }
+                            if (moneyRecipient == 0)
                             {
                                 return;
                             }
+
                             Console.WriteLine("Enter amount:");
-                          
-                            string transferAmount = Console.ReadLine();
+                            decimal transferAmount; //= Console.ReadLine();
+                            if (!decimal.TryParse(Console.ReadLine(), out transferAmount))
+                            {
+                                Console.WriteLine("Invalid input. Please enter only a number.");
+                            }
+
                             TransferModel transfer = new TransferModel();
-                            transfer.TransferAmount = decimal.Parse(transferAmount);
-                            transfer.AccountTo = int.Parse(moneyRecipient);
-                            
-                            
-                            Console.WriteLine("TRANSFERRING NOT IMPLEMENTED!"); // TODO: Implement me
+                            transfer.TransferAmount = transferAmount;
+                            transfer.RecipientUserId = moneyRecipient;
+                            transfer.SenderUserId = accounts.UserId;
+
+                            transferClient.NewTransfer(transfer);
+                            Console.WriteLine(transfer.TransferAmount + " TE bucks transferred! Woot!"); // TODO: Implement me
+
                             break;
 
                         case 5: // Request TE Bucks
@@ -146,8 +157,8 @@ namespace TenmoClient
             Console.WriteLine("-----------------------------------------------");
             foreach (UserModel user in users)
             {
-                if(user.UserId!= account.UserId)
-                Console.WriteLine(user.UserId.ToString().PadRight(20) + user.Username);
+                if (user.UserId != account.UserId)
+                    Console.WriteLine(user.UserId.ToString().PadRight(20) + user.Username);
             }
             Console.WriteLine("-----------------------------------------------");
         }
