@@ -46,6 +46,7 @@ namespace TenmoServer
             services.AddSingleton<IPasswordHasher>(sp => new PasswordHasher());
             services.AddSingleton<IUserDAO>(sp => new UserSqlDAO(connectionString));
             services.AddSingleton<IAccountDAO>(sp => new AccountDAO(connectionString));
+            services.AddSingleton<ITransferDAO>(sp => new TransferDAO(connectionString));
         }
 
         private static void ConfigureSwagger(IServiceCollection services)
