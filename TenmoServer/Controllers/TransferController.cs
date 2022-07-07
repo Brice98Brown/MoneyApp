@@ -16,9 +16,11 @@ namespace TenmoServer.Controllers
     public class TransferController : ControllerBase
     {
         private readonly ITransferDAO transferDAO;
-        public TransferController(ITransferDAO transfer)
+        private readonly IAccountDAO accountDAO;
+        public TransferController(ITransferDAO transfer, IAccountDAO account)
         {
             this.transferDAO = transfer;
+            this.accountDAO = account;
         }
         private int LoggedInUserId
         {
@@ -37,21 +39,50 @@ namespace TenmoServer.Controllers
                 }
             }
         }
-        [HttpPost]
+        [HttpPost()]
         [Authorize]
         public ActionResult Transfer(Transfers transfers)
         {
-            
-            
-            int id = LoggedInUserId;
-            transfers.AccountFrom = id;
-            transfers.AccountTo = ;
-            transfers.TransferAmount = ;
-            transfers.TransferType = ;
-            transfers.TransferStatus = ;
+            int currentUserId = LoggedInUserId;
 
+            if (currentUserId <= 0)
+            {
+                return Unauthorized("Please use valid Login Credientals homeslice");
+            }
 
-            return Ok();
+            Account currentUserAccount = accountDAO.GetAccountByUserId(currentUserId);
+            
+            if(currentUserAccount == null)
+            {
+                return NotFound("Could not find your account. Feels bad man");
+            }
+
+            if (transfers.AccountFrom != currentUserAccount.AccountId)
+            {
+                return BadRequest("You cannot transfer money from an account that isn't yours bruh");
+            }
+
+            Account targetAccount = accountDAO.GetAccountByAccountId(transfers.AccountTo);
+
+            if (targetAccount == null)
+            {
+                return NotFound("could not find target account broseph");
+            }
+            
+            if(transfers.TransferAmount > currentUserAccount.Balance)
+            {
+                return BadRequest("You need more cash money");
+            }
+            if(transfers.TransferAmount<=0)
+            {
+                return BadRequest("That ain't very cash money");
+            }
+            if (transfers.AccountTo == transfers.AccountFrom)
+            {
+                return BadRequest("You can't transfer money to yourself buddy pal");
+            }
+            transfers = transferDAO.TransferMoneyToUser(transfers.AccountTo, transfers.TransferAmount, transfers.AccountFrom);
+            return Ok(transfers);
         }
     }
 }

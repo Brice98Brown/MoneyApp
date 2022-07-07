@@ -47,5 +47,25 @@ namespace TenmoServer.DAO
 
             return account;
         }
+
+        public Account GetAccountByAccountId(int accountId)
+        {
+            string query = "SELECT account_id,user_id,balance FROM accounts WHERE account_id = @accountid";
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                SqlCommand command = new SqlCommand(query, conn);
+                command.Parameters.AddWithValue("@accountid", accountId);
+
+                SqlDataReader reader = command.ExecuteReader();
+                if (reader.Read())
+                {
+                    Account account = GetAccountFromDataReader(reader);
+                    return account;
+                }
+            }
+            return null;
+        }
     }
 }

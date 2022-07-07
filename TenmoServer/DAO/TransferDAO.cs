@@ -18,7 +18,7 @@ namespace TenmoServer.DAO
         {
 
 
-            Transfers transfers = null;
+            Transfers transfers;
 
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
@@ -31,6 +31,7 @@ namespace TenmoServer.DAO
                 cmd.ExecuteNonQuery();
                 cmd = new SqlCommand("SELECT @@IDENTITY", conn);
                 int transferId = Convert.ToInt32(cmd.ExecuteScalar());
+                transfers = new Transfers();
                 transfers.TransferId = transferId;
                 transfers.TransferType = "Send";
                 transfers.TransferStatus = "Approved";
