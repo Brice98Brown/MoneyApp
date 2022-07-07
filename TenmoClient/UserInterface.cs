@@ -11,6 +11,7 @@ namespace TenmoClient
         private readonly AuthService authService = new AuthService();
         private readonly AccountRestClient accountClient = new AccountRestClient();
         private readonly UserRestClient userClient = new UserRestClient();
+        private readonly TransferRestClient transferClient = new TransferRestClient();
 
         private bool quitRequested = false;
 
@@ -92,7 +93,21 @@ namespace TenmoClient
                             break;
 
                         case 4: // Send TE Bucks
-                            DisplayAllUsers(accounts); //passing in the account of the person logged in so that it doesn't display
+                            DisplayAllUsers(accounts);//passing in the account of the person logged in so that it doesn't display
+                            Console.WriteLine("Enter ID of user you are sending to (0 to cancel):");
+                            string moneyRecipient = Console.ReadLine();  
+                            if (int.Parse(moneyRecipient) == 0)
+                            {
+                                return;
+                            }
+                            Console.WriteLine("Enter amount:");
+                          
+                            string transferAmount = Console.ReadLine();
+                            TransferModel transfer = new TransferModel();
+                            transfer.TransferAmount = decimal.Parse(transferAmount);
+                            transfer.AccountTo = int.Parse(moneyRecipient);
+                            
+                            
                             Console.WriteLine("TRANSFERRING NOT IMPLEMENTED!"); // TODO: Implement me
                             break;
 
@@ -167,6 +182,7 @@ namespace TenmoClient
                     // TODO: Do something with this JWT.
                     accountClient.UpdateToken(jwt);
                     userClient.GetToken(jwt);
+                    transferClient.UpdateToken(jwt);
 
                 }
             }
@@ -175,6 +191,7 @@ namespace TenmoClient
         {
             accountClient.UpdateToken(null);
             userClient.GetToken(null);
+            transferClient.UpdateToken(null);
         }
     }
 }
