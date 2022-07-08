@@ -119,9 +119,7 @@ namespace TenmoClient
                             authService.ClearAuthenticator();
                             Logout();
                             ShowLogInMenu();
-                            // NOTE: You will need to clear any stored JWTs in other API Clients
-
-
+                            
                             return; // Leaves the menu and should return as someone else
 
                         case 0: // Quit
@@ -217,7 +215,7 @@ namespace TenmoClient
         private void GetTransferAmount(AccountsModel accounts, int moneyRecipient)
         {
             Console.WriteLine("Enter amount:");
-            decimal transferAmount; //= Console.ReadLine();
+            decimal transferAmount;
             if (!decimal.TryParse(Console.ReadLine(), out transferAmount))
             {
                 Console.WriteLine("Invalid input. Please enter only a number.");
@@ -226,9 +224,13 @@ namespace TenmoClient
             {
                 Console.WriteLine("I'm positive that number wasn't.");
             }
-            else if (transferAmount.ToString().Contains(".") && transferAmount.ToString().Substring(transferAmount.ToString().IndexOf(".")).Length > 3)
+            else if (transferAmount.ToString().Contains(".") && transferAmount.ToString().Substring(transferAmount.ToString().IndexOf(".")).Length > 3) // protects against Matt breaking it with more than 2 decimal places
             {
                     Console.WriteLine("That amount doesn't make Cents, Bruh");
+            }
+            else if(accounts.Balance < transferAmount)
+            {
+                Console.WriteLine("You need more cha-ching");
             }
             else
             {
@@ -283,7 +285,7 @@ namespace TenmoClient
                 {
                     string jwt = authenticatedUser.Token;
 
-                    // TODO: Do something with this JWT.
+                    //This makes sure the jwt is in all of the Rest Clients
                     accountClient.UpdateToken(jwt);
                     userClient.GetToken(jwt);
                     transferClient.UpdateToken(jwt);
