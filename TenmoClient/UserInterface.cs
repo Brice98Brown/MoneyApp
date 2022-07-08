@@ -82,7 +82,7 @@ namespace TenmoClient
                     switch (menuSelection)
                     {
                         case 1: // View Balance
-                            Console.WriteLine($"Your Current Account Balance is : ${accounts.Balance}");
+                            Console.WriteLine($"Your Current Account Balance is : {accounts.Balance.ToString("C")}");
                             break;
 
                         case 2: // View Past Transfers
@@ -109,6 +109,10 @@ namespace TenmoClient
                             if (!int.TryParse(Console.ReadLine(), out int transferIdInput))
                             {
                                 Console.WriteLine("Invalid input. Please enter only a number.");
+                            }
+                            else if (transferIdInput == 0) 
+                            {
+                                return;
                             }
                             else
                             {
@@ -147,11 +151,25 @@ namespace TenmoClient
                             {
                                 Console.WriteLine("Invalid input. Please enter only a number.");
                             }
-                            if (moneyRecipient == 0)
+                            else if (moneyRecipient == 0)
                             {
                                 return;
                             }
-                            GetTransferAmount(accounts, moneyRecipient); // TODO: Implement me
+                            else
+                            {
+                                List<UserModel> users = userClient.GetAllUsers();
+                                foreach (UserModel user in users)
+                                {
+                                    if (user.UserId == moneyRecipient)
+                                    { 
+                                        GetTransferAmount(accounts, moneyRecipient);
+                                        return;
+                                    }
+                                }
+                                Console.WriteLine("Could not find Id. Maybe they went to go get milk?");
+                            }
+                            
+                            // TODO: Implement me
 
                             break;
 
@@ -190,14 +208,31 @@ namespace TenmoClient
             {
                 Console.WriteLine("Invalid input. Please enter only a number.");
             }
+            else if (transferAmount < 0)
+            {
+                Console.WriteLine("I'm positive that number wasn't.");
+            }
+            else if (transferAmount.ToString().Contains(".") && transferAmount.ToString().Substring(transferAmount.ToString().IndexOf(".")).Length > 3)
+            {
+                
+                //string decimalCheck = transferAmount.ToString().Substring(transferAmount.ToString().IndexOf("."));
+                //if (decimalCheck.Length > 3)
+                //{
+                    Console.WriteLine("That amount doesn't make Cents, Bruh");
+               //}
+            }
+            else
+            {
+                TransferModel transfer = new TransferModel();
+                transfer.TransferAmount = transferAmount;
+                transfer.RecipientUserId = moneyRecipient;
+                transfer.SenderUserId = accounts.UserId;
 
-            TransferModel transfer = new TransferModel();
-            transfer.TransferAmount = transferAmount;
-            transfer.RecipientUserId = moneyRecipient;
-            transfer.SenderUserId = accounts.UserId;
+                transferClient.NewTransfer(transfer);
+                Console.WriteLine(transfer.TransferAmount.ToString("C") + " TE bucks transferred! Woot!");
+            }
 
-            transferClient.NewTransfer(transfer);
-            Console.WriteLine(transfer.TransferAmount + " TE bucks transferred! Woot!");
+           
         }
 
         private void DisplayAllUsers(AccountsModel account)
