@@ -68,7 +68,7 @@ namespace TenmoServer.DAO
 
         private Transfers GetTransfersFromDataReader(SqlDataReader reader)
         {
-           int transferId = Convert.ToInt32(reader["transfer_id"]);
+            int transferId = Convert.ToInt32(reader["transfer_id"]);
             int accountIdTo = Convert.ToInt32(reader["account_to"]);
             int accountIdFrom = Convert.ToInt32(reader["account_from"]);
             decimal amountToTransfer = Convert.ToDecimal(reader["amount"]);
@@ -77,12 +77,98 @@ namespace TenmoServer.DAO
             transfers.TransferId = transferId;
             transfers.TransferType = "Send";
             transfers.TransferStatus = "Approved";
-            
+
             transfers.AccountTo = accountIdTo;
             transfers.AccountFrom = accountIdFrom;
             transfers.TransferAmount = amountToTransfer;
 
             return transfers;
+        }
+
+        public Transfers RequestTransferMoneyFromUser(int recepiantAccountId, decimal ammountToTransfer, int senderAccountId)
+        {
+            Transfers transfers;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                const string query = "INSERT INTO transfers (transfer_type_id, transfer_status_id,account_from, account_to, amount) VALUES (1000,2000, @account_from, @account_to, @amount)";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@amount", ammountToTransfer);
+                cmd.Parameters.AddWithValue("@account_from", senderAccountId);
+                cmd.Parameters.AddWithValue("@account_to", recepiantAccountId);
+                cmd.ExecuteNonQuery();
+                cmd = new SqlCommand("SELECT @@IDENTITY", conn);
+                int transferId = Convert.ToInt32(cmd.ExecuteScalar());
+                transfers = new Transfers();
+                transfers.TransferId = transferId;
+                transfers.TransferType = "Request";
+                transfers.TransferStatus = "Pending";
+                transfers.AccountTo = recepiantAccountId;
+                transfers.AccountFrom = senderAccountId;
+                transfers.TransferAmount = ammountToTransfer;
+            }
+            return transfers;
+        }
+        public Transfers UpdateTrasferStatus(int recepiantAccountId, decimal ammountToTransfer, int transferStatusId, int senderAccountId, int transferId)
+        {
+            Transfers transfers = GetTransferById(transferId);
+            
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+                string query = " ";
+                string status = " ";
+                if (transferStatusId == 2001)//Approved
+                {
+                    query = "BEGIN TRANSACTION UPDATE accounts SET balance = balance - @amount WHERE account_id = @account_from UPDATE accounts SET balance = balance + @amount WHERE account_id = @account_to UPDATE transfers SET transfer_status_id = @transferStatusId WHERE transfer_id = @transferId ROLLBACK TRANSACTION";
+                    status = "Approved";
+                }
+                else if (transferStatusId == 2002)//rejected
+                {
+                    query = "UPDATE transfers SET transfer_status_id = @transferStatusId WHERE transfer_id = @transferId";
+                    status = "Rejected";
+                }
+                else
+                {
+                    return transfers;
+                }
+
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@amount", ammountToTransfer);
+                cmd.Parameters.AddWithValue("@account_from", senderAccountId);
+                cmd.Parameters.AddWithValue("@account_to", recepiantAccountId);
+                cmd.Parameters.AddWithValue("@transferStatusId", transferStatusId);
+                cmd.Parameters.AddWithValue("@transferId", transferId);
+
+                cmd.ExecuteNonQuery();
+
+                
+                
+                transfers.TransferStatus = status;
+                
+            }
+            return transfers;
+        }
+
+        public Transfers GetTransferById(int transferId)
+        {
+            Transfers transfers = null;
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+
+                conn.Open();
+                string query = "SELECT transfer_id, transfer_type_id, transfer_status_id, account_from, account_to, amount FROM transfers WHERE transfer_id = @transferId";
+                SqlCommand cmd = new SqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@transferId", transferId);
+                SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.HasRows && reader.Read())
+                {
+                    transfers = GetTransfersFromDataReader(reader);
+                }
+                return transfers;
+            }
+
         }
     }
 }

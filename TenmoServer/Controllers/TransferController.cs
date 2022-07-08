@@ -141,5 +141,49 @@ namespace TenmoServer.Controllers
             }
             return Ok(safeTransfers);
         }
+        [HttpPost("Request")]
+        [Authorize]
+        public ActionResult RequestTransferMoneyFromUser(Transfers transfers)
+        {
+            int currentUserId = LoggedInUserId;
+
+            if (currentUserId <= 0)
+            {
+                return Unauthorized("Please use valid Login Credientals homeslice");
+            }
+
+            Account currentUserAccount = accountDAO.GetAccountByUserId(currentUserId);
+
+            if (currentUserAccount == null)
+            {
+                return NotFound("Could not find your account. Feels bad man");
+            }
+
+            if (transfers.RecipientUserId != currentUserAccount.UserId)
+            {
+                return BadRequest("You cannot request money for an account that isn't yours bruh");
+            }
+
+            Account senderAccount = accountDAO.GetAccountByUserId(transfers.SenderUserId);
+
+            if (senderAccount == null)
+            {
+                return NotFound("could not find account broseph");
+            }
+            if (transfers.TransferAmount <= 0)
+            {
+                return BadRequest("That ain't very cash money");
+            }
+            if (transfers.RecipientUserId == transfers.SenderUserId)
+            {
+                return BadRequest("You can't request money from yourself buddy pal");
+            }
+            transfers = transferDAO.RequestTransferMoneyFromUser(currentUserAccount.AccountId, transfers.TransferAmount, senderAccount.AccountId);
+            transfers.SenderUserId = senderAccount.UserId;
+            transfers.RecipientUserId = currentUserAccount.UserId;
+            transfers.AccountFrom = 0;
+            transfers.AccountTo = 0;
+            return Ok(transfers);
+        }
     }
 }

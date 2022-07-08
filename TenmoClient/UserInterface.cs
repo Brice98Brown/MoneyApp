@@ -111,7 +111,35 @@ namespace TenmoClient
                             break;
 
                         case 5: // Request TE Bucks
-                            Console.WriteLine("NOT IMPLEMENTED!"); // TODO: Implement me
+                            //DisplayAllUsers(accounts);
+                            //Console.WriteLine("Ask for dough Gimme an ID");
+                            //string request = Console.ReadLine();
+                            //Console.WriteLine("Gimme a Dough Amount Holmes");
+                            //decimal requestAmount;
+                            //if (!decimal.TryParse(Console.ReadLine(), out requestAmount))
+                            //{
+                            //    Console.WriteLine("Invalid input. Please enter only a number.");
+                            //}
+                            //else if (requestAmount < 0)
+                            //{
+                            //    Console.WriteLine("I'm positive that number wasn't.");
+                            //}
+                            //else if (requestAmount.ToString().Contains(".") && requestAmount.ToString().Substring(requestAmount.ToString().IndexOf(".")).Length > 3) // protects against Matt breaking it with more than 2 decimal places
+                            //{
+                            //    Console.WriteLine("That amount doesn't make Cents, Bruh");
+                            //}
+                            //else
+                            //{
+                            //    TransferModel transfer = new TransferModel();
+                            //    transfer.TransferAmount = requestAmount;
+                            //    transfer.RecipientUserId = accounts.UserId;
+                            //    transfer.SenderUserId = int.Parse(request);
+
+                            //    transferClient.NewTransferRequest(transfer);
+                            //    Console.WriteLine(transfer.TransferAmount.ToString("C") + " TE bucks requested! Woot!");
+                            //}
+                            Console.WriteLine("Sorry Man Too tired to fix it");
+                            
                             break;
 
                         case 6: // Log in as someone else
