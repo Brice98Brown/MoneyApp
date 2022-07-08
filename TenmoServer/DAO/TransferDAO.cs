@@ -16,10 +16,7 @@ namespace TenmoServer.DAO
         }
         public Transfers TransferMoneyToUser(int accountIdTo, decimal ammountToTransfer, int accountIdFrom)
         {
-
-
             Transfers transfers;
-
             using (SqlConnection conn = new SqlConnection(connectionString))
             {
                 conn.Open();
@@ -38,18 +35,12 @@ namespace TenmoServer.DAO
                 transfers.AccountTo = accountIdTo;
                 transfers.AccountFrom = accountIdFrom;
                 transfers.TransferAmount = ammountToTransfer;
-
-
-
             }
-
             return transfers;
-
         }
 
         public List<Transfers> GetAllTransfersForOneUser(int userId)
         {
-
             List<Transfers> transfers = new List<Transfers>();
 
             const string sql = "SELECT account_from, account_to, transfer_id, amount FROM transfers INNER JOIN accounts a on a.account_id = account_from OR account_id = account_to INNER JOIN users u on u.user_id = a.user_id WHERE u.user_id = @userId";
@@ -81,14 +72,6 @@ namespace TenmoServer.DAO
             int accountIdTo = Convert.ToInt32(reader["account_to"]);
             int accountIdFrom = Convert.ToInt32(reader["account_from"]);
             decimal amountToTransfer = Convert.ToDecimal(reader["amount"]);
-
-            //// Get the user ID which may be null
-            //object userIdRaw = reader["user_id"];
-            //int? userId = null;
-            //if (userIdRaw != DBNull.Value)
-            //{
-            //    userId = Convert.ToInt32(userIdRaw);
-            //}
 
             Transfers transfers = new Transfers();
             transfers.TransferId = transferId;

@@ -87,56 +87,17 @@ namespace TenmoClient
 
                         case 2: // View Past Transfers
                             List<TransferModel> transfers = transferClient.GetListOfTransfers(accounts.UserId);
-                            Console.WriteLine("----------------------------------------------------------");
 
+                            Console.WriteLine("----------------------------------------------------------");
                             Console.WriteLine("Transfer ID".PadRight(20) + "From/To".PadRight(25) + "Amount");
                             Console.WriteLine("----------------------------------------------------------");
 
-                            foreach (TransferModel transfer in transfers)
-                            {
-                                if (transfer.RecipientUserId == accounts.UserId)
-                                {
-                                    //from
-                                    Console.WriteLine(transfer.TransferId.ToString().PadRight(20) + "From: " + transfer.SenderUsername.PadRight(21) + transfer.TransferAmount.ToString("C"));
-                                }
-                                else if (transfer.SenderUserId == accounts.UserId)
-                                {
-                                    Console.WriteLine(transfer.TransferId.ToString().PadRight(20) + "To: " + transfer.RecipientUsername.PadRight(21) + transfer.TransferAmount.ToString("C"));
-                                }
-
-                            }
+                            ListTransfers(accounts, transfers);
+                            
                             Console.WriteLine("Please enter transfer ID to view details (0 to cancel):");
-                            if (!int.TryParse(Console.ReadLine(), out int transferIdInput))
-                            {
-                                Console.WriteLine("Invalid input. Please enter only a number.");
-                            }
-                            else if (transferIdInput == 0) 
-                            {
-                                return;
-                            }
-                            else
-                            {
-                                foreach (TransferModel transfer in transfers)
-                                {
-
-                                    if (transferIdInput == transfer.TransferId)
-                                    {
-                                        Console.WriteLine("----------------------------------------------------------");
-                                        Console.WriteLine("Transfer Details");
-                                        Console.WriteLine("----------------------------------------------------------");
-                                        Console.WriteLine("Id: " + transfer.TransferId);
-                                        Console.WriteLine("From: " + transfer.SenderUsername);
-                                        Console.WriteLine("To: " + transfer.RecipientUsername);
-                                        Console.WriteLine("Type: " + transfer.TransferType);
-                                        Console.WriteLine("Status: " + transfer.TransferStatus);
-                                        Console.WriteLine("Amount: " + transfer.TransferAmount.ToString("C"));
-                                        return;
-                                    }
-                                    
-                                    
-                                }
-                                Console.WriteLine("Invalid Id");
-                            }
+                           
+                            GetTransferDetails(transfers);
+                            
                             break;
 
                         case 3: // View Pending Requests
@@ -144,32 +105,8 @@ namespace TenmoClient
                             break;
 
                         case 4: // Send TE Bucks
-                            DisplayAllUsers(accounts);//passing in the account of the person logged in so that it doesn't display
-                            Console.WriteLine("Enter ID of user you are sending to (0 to cancel):");
-                            int moneyRecipient; //= Console.ReadLine();
-                            if (!int.TryParse(Console.ReadLine(), out moneyRecipient))
-                            {
-                                Console.WriteLine("Invalid input. Please enter only a number.");
-                            }
-                            else if (moneyRecipient == 0)
-                            {
-                                return;
-                            }
-                            else
-                            {
-                                List<UserModel> users = userClient.GetAllUsers();
-                                foreach (UserModel user in users)
-                                {
-                                    if (user.UserId == moneyRecipient)
-                                    { 
-                                        GetTransferAmount(accounts, moneyRecipient);
-                                        return;
-                                    }
-                                }
-                                Console.WriteLine("Could not find Id. Maybe they went to go get milk?");
-                            }
-                            
-                            // TODO: Implement me
+
+                            MakeATransfer(accounts);
 
                             break;
 
@@ -200,6 +137,83 @@ namespace TenmoClient
             } while (menuSelection != 0);
         }
 
+        private static void ListTransfers(AccountsModel accounts, List<TransferModel> transfers)
+        {
+            foreach (TransferModel transfer in transfers)
+            {
+                if (transfer.RecipientUserId == accounts.UserId)
+                {
+                    //from
+                    Console.WriteLine(transfer.TransferId.ToString().PadRight(20) + "From: " + transfer.SenderUsername.PadRight(21) + transfer.TransferAmount.ToString("C"));
+                }
+                else if (transfer.SenderUserId == accounts.UserId)
+                {
+                    //to
+                    Console.WriteLine(transfer.TransferId.ToString().PadRight(20) + "To: " + transfer.RecipientUsername.PadRight(21) + transfer.TransferAmount.ToString("C"));
+                }
+
+            }
+        }
+
+        private void MakeATransfer(AccountsModel accounts)
+        {
+            DisplayAllUsers(accounts);//passing in the account of the person logged in so that it doesn't display
+            Console.WriteLine("Enter ID of user you are sending to (0 to cancel):");
+            int moneyRecipient; //= Console.ReadLine();
+            if (!int.TryParse(Console.ReadLine(), out moneyRecipient))
+            {
+                Console.WriteLine("Invalid input. Please enter only a number.");
+            }
+            else if (moneyRecipient == 0)
+            {
+                return;
+            }
+            else
+            {
+                List<UserModel> users = userClient.GetAllUsers();
+                foreach (UserModel user in users)
+                {
+                    if (user.UserId == moneyRecipient)
+                    {
+                        GetTransferAmount(accounts, moneyRecipient);
+                        return;
+                    }
+                }
+                Console.WriteLine("Could not find Id. Maybe they went to go get milk?");
+            }
+        }
+
+        private void GetTransferDetails(List<TransferModel> transfers)
+        {
+            if (!int.TryParse(Console.ReadLine(), out int transferIdInput))
+            {
+                Console.WriteLine("Invalid input. Please enter only a number.");
+            }
+            else if (transferIdInput == 0)
+            {
+                return;
+            }
+            else
+            {
+                foreach (TransferModel transfer in transfers)
+                {
+                    if (transferIdInput == transfer.TransferId)
+                    {
+                        Console.WriteLine("----------------------------------------------------------");
+                        Console.WriteLine("Transfer Details");
+                        Console.WriteLine("----------------------------------------------------------");
+                        Console.WriteLine("Id: " + transfer.TransferId);
+                        Console.WriteLine("From: " + transfer.SenderUsername);
+                        Console.WriteLine("To: " + transfer.RecipientUsername);
+                        Console.WriteLine("Type: " + transfer.TransferType);
+                        Console.WriteLine("Status: " + transfer.TransferStatus);
+                        Console.WriteLine("Amount: " + transfer.TransferAmount.ToString("C"));
+                        return;
+                    }
+                }
+                Console.WriteLine("Invalid Id");
+            }
+        }
         private void GetTransferAmount(AccountsModel accounts, int moneyRecipient)
         {
             Console.WriteLine("Enter amount:");
@@ -214,12 +228,7 @@ namespace TenmoClient
             }
             else if (transferAmount.ToString().Contains(".") && transferAmount.ToString().Substring(transferAmount.ToString().IndexOf(".")).Length > 3)
             {
-                
-                //string decimalCheck = transferAmount.ToString().Substring(transferAmount.ToString().IndexOf("."));
-                //if (decimalCheck.Length > 3)
-                //{
                     Console.WriteLine("That amount doesn't make Cents, Bruh");
-               //}
             }
             else
             {
@@ -231,8 +240,6 @@ namespace TenmoClient
                 transferClient.NewTransfer(transfer);
                 Console.WriteLine(transfer.TransferAmount.ToString("C") + " TE bucks transferred! Woot!");
             }
-
-           
         }
 
         private void DisplayAllUsers(AccountsModel account)
