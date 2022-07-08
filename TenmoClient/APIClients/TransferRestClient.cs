@@ -39,6 +39,31 @@ namespace TenmoClient.APIClients
             return response.Data;
 
         }
+        public List<TransferModel> GetListOfTransfers(int currentUserId)
+        {
+            RestRequest request = new RestRequest("api/transfer/" + currentUserId);
+            request.AddHeader("Authorization", "Bearer " + token);
+            IRestResponse<List<TransferModel>> response = client.Get<List<TransferModel>>(request);
+
+            if (response.ResponseStatus != ResponseStatus.Completed)
+            {
+                Console.WriteLine("Could not connect to Tenmo Servers; Try again later!");
+
+                return null;
+            }
+
+            if (!response.IsSuccessful)
+            {
+                Console.WriteLine("Problem getting Account: " + response.StatusDescription);
+                Console.WriteLine(response.Content);
+
+                return null;
+            }
+
+            return response.Data;
+
+
+        }
         private string token;
 
         public void UpdateToken(string jwt)

@@ -94,6 +94,7 @@ namespace TenmoServer.DAO
             transfers.TransferId = transferId;
             transfers.TransferType = "Send";
             transfers.TransferStatus = "Approved";
+            
             transfers.AccountTo = accountIdTo;
             transfers.AccountFrom = accountIdFrom;
             transfers.TransferAmount = amountToTransfer;

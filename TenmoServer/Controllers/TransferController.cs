@@ -132,6 +132,8 @@ namespace TenmoServer.Controllers
                 newSafeTransfer.TransferAmount = transfer.TransferAmount;
                 newSafeTransfer.TransferStatus = transfer.TransferStatus;
                 newSafeTransfer.TransferType = transfer.TransferType;
+                newSafeTransfer.RecipientUserId = accountTo.UserId;
+                newSafeTransfer.SenderUserId = accountFrom.UserId;
                 newSafeTransfer.AccountTo = 0;
                 newSafeTransfer.AccountFrom = 0;
 
